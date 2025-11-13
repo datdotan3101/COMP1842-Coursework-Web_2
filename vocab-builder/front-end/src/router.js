@@ -1,9 +1,10 @@
-import Vue from 'vue'
+import Vue from "vue";
 import Router from "vue-router";
 import Words from "./views/Words.vue";
 import Show from "./views/Show.vue";
 import Edit from "./views/Edit.vue";
-
+import New from "./views/New.vue";
+import Test from "./views/Test.vue";
 
 Vue.use(Router);
 
@@ -22,15 +23,10 @@ export default new Router({
       component: Words,
     },
     {
-      path: "/words",
-      name: "words",
-      component: Words,
+      path: "/words/new",
+      name: "new-word",
+      component: New,
     },
-    // {
-    //   path: "/words/new",
-    //   name: "new-word",
-    //   component: New,
-    // },
     {
       path: "/words/:id",
       name: "show",
@@ -41,10 +37,10 @@ export default new Router({
       name: "edit",
       component: Edit,
     },
-    // {
-    //   path: "/test",
-    //   name: "test",
-    //   component: Test,
-    // },
+    {
+      path: "/test",
+      name: "test",
+      component: Test,
+    },
   ],
 });

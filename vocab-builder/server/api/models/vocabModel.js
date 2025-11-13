@@ -11,7 +11,7 @@ const VocabSchema = new Schema(
       type: String,
       required: "German word is cannot be blank",
     },
-  },
+    },
   { collection: "vocab" }
 );
 

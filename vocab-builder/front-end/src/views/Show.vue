@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="word">
       <h1>Show Word</h1>
   
       <div class="ui labeled input fluid">
@@ -29,7 +29,7 @@ export default {
   name: 'show',
   data() {
     return {
-      word: ''
+      word: null
     };
   },
   async mounted() {
