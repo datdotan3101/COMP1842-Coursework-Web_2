@@ -17,19 +17,18 @@ const handleError =
   (fn) =>
   (...params) =>
     fn(...params).catch((error) => {
-      // console.log(error);
       if (error.response) {
-        // Nếu có phản hồi lỗi từ server (VD: 404, 500)
+       // reponse from server
         vm.flash(
           `${error.response.status}: ${error.response.statusText}`,
           "error"
         );
       } else if (error.request) {
-        // Nếu server không phản hồi (lỗi mạng, server sập)
-        vm.flash("Server không phản hồi. API đang chạy chứ?", "error");
+       
+        vm.flash("Server is not reponse", "error");
       } else {
-        // Lỗi khác
-        vm.flash(`Lỗi: ${error.message}`, "error");
+        // Other error
+        vm.flash(`Error: ${error.message}`, "error");
       }
       return Promise.reject(error);
     });

@@ -21,7 +21,7 @@ export default {
       this.flash('Word created', 'success'); 
       this.$router.push(`/words/${res._id}`); 
     } catch(error){
-         console.error('Lỗi từ server:', error.response.data);
+         console.error('Error server:', error.response.data);
     }
     }
   }

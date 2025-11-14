@@ -2,6 +2,15 @@
   <form action="#" @submit.prevent="onSubmit">
      <p v-if="errorsPresent" class="error">Please fill out both fields!</p>
  
+       <!-- English  -->
+     <div class="ui labeled input fluid">
+       <div class="ui label">
+         <i class="united kingdom flag"></i> English
+       </div>
+       <input type="text" placeholder="Enter word..." v-model="word.english" />
+     </div>
+
+     <!-- German  -->
      <div class="ui labeled input fluid">
        <div class="ui label">
          <i class="germany flag"></i> German
@@ -9,13 +18,14 @@
        <input type="text" placeholder="Enter word..." v-model="word.german" />
      </div>
  
-     <div class="ui labeled input fluid">
+     <!-- Vietnamese  -->
+      <div class="ui labeled input fluid">
        <div class="ui label">
-         <i class="united kingdom flag"></i> English
+        <i class="vn flag"></i> Vietnamese
        </div>
-       <input type="text" placeholder="Enter word..." v-model="word.english" />
+       <input type="text" placeholder="Enter word..." v-model="word.vietnamese" />
      </div>
- 
+
      <button class="positive ui button">Submit</button>
    </form>
  </template>
@@ -30,8 +40,8 @@
        default: ()=>{
         return{
           english: '',
-          german: ''
-        
+          german: '',
+          vietnamese: ''
         }
        }
      }
@@ -43,13 +53,14 @@
    },
    methods: {
      onSubmit: function() {
-      if(this.word.english === ''|| this.word.german === ''){
+      if(this.word.english === ''|| this.word.german === '' || this.word.vietnamese === ''){
 this.errorsPresent = true;
       }else{
 this.$emit('createOrUpdate', this.word);
       }
        console.log(`English: ${this.word.english}`);
        console.log(`German: ${this.word.german}`);
+       console.log(`Vietnamese: ${this.word.vietnamese}`);
      }
    }
  };
@@ -58,5 +69,9 @@ this.$emit('createOrUpdate', this.word);
  <style scoped>
  .error {
    color: red;
+ }
+
+ .ui .label{
+  width: 10rem;
  }
  </style>

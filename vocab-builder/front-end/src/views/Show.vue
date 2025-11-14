@@ -2,18 +2,30 @@
     <div v-if="word">
       <h1>Show Word</h1>
   
-      <div class="ui labeled input fluid">
-        <div class="ui label">
-          <i class="germany flag"></i> German
-        </div>
-        <input type="text" readonly  :value="word.german"/>
-      </div>
+       <!-- English  -->
       <div class="ui labeled input fluid">
         <div class="ui label">
           <i class="united kingdom flag"></i> English
         </div>
         <input type="text" readonly  :value="word.english"/>
       </div>
+
+      <!-- German  -->
+      <div class="ui labeled input fluid">
+        <div class="ui label">
+          <i class="germany flag"></i> German
+        </div>
+        <input type="text" readonly  :value="word.german"/>
+      </div>
+
+      <!-- Vietnamese  -->
+        <div class="ui labeled input fluid">
+        <div class="ui label">
+          <i class="vn flag"></i> Vietnamese
+        </div>
+        <input type="text" readonly  :value="word.vietnamese"/>
+      </div>
+
       <div class="actions">
         <router-link :to="{ name: 'edit', params: { id: this.$route.params.id }}">
           Edit word
@@ -43,5 +55,8 @@ export default {
     display: block;
     text-decoration: underline;
     margin: 20px 10px;
+  }
+  .ui .label{
+    width: 10rem
   }
   </style>
