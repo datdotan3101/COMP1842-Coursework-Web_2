@@ -51,3 +51,13 @@ exports.delete_a_word = (req, res) => {
     res.json({ message: "Word successfully deleted", _id: req.params.wordId });
   });
 };
+
+exports.getTestWords = async (req, res) => {
+  try {
+    // Get random 10 words
+    const words = await Vocab.aggregate([{ $sample: { size: 10 } }]); // get random data from database
+    res.json(words);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};

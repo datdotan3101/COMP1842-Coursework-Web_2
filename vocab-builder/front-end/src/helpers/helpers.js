@@ -18,13 +18,12 @@ const handleError =
   (...params) =>
     fn(...params).catch((error) => {
       if (error.response) {
-       // reponse from server
+        // reponse from server
         vm.flash(
           `${error.response.status}: ${error.response.statusText}`,
           "error"
         );
       } else if (error.request) {
-       
         vm.flash("Server is not reponse", "error");
       } else {
         // Other error
@@ -37,8 +36,6 @@ export const api = {
   getWord: handleError(async (id) => {
     const res = await axios.get(baseURL + id);
     return res.data;
-
-
   }),
 
   getWords: handleError(async () => {
@@ -58,6 +55,10 @@ export const api = {
 
   updateWord: handleError(async (payload) => {
     const res = await axios.put(baseURL + payload._id, payload);
+    return res.data;
+  }),
+  getTestWords: handleError(async () => {
+    const res = await axios.get(baseURL + "test");
     return res.data;
   }),
 };
