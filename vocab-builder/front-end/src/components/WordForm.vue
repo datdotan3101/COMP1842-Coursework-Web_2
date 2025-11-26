@@ -68,8 +68,18 @@ export default {
   data() {
     return {
       errorMessage: '',
-      isSuggesting: false
+      isSuggesting: false,
+      originalWord: {}
     };
+  },
+  watch: {
+    word: {
+      handler(newVal) {
+        this.originalWord = JSON.parse(JSON.stringify(newVal));
+      },
+      deep: true,
+      immediate: true
+    }
   },
   methods: {
     isValidText(text) {
@@ -78,31 +88,50 @@ export default {
       return pattern.test(text);
     },
 
-    onSubmit: function() {
-      // 1. Proccess space
-      if (this.word.english) this.word.english = this.word.english.trim();
-      if (this.word.german) this.word.german = this.word.german.trim();
-      if (this.word.vietnamese) this.word.vietnamese = this.word.vietnamese.trim();
+   onSubmit: function() {
+      const formatText = (text) => {
+        if (!text) return '';
+        const trimmed = text.trim();
+        return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+      };
 
-      // 2. Check empty
-      if (this.word.english === '' || this.word.german === '' || this.word.vietnamese === '') {
+      // 1. Process & Format Data 
+      let newEnglish = this.word.english ? formatText(this.word.english) : '';
+      let newVietnamese = this.word.vietnamese ? formatText(this.word.vietnamese) : '';
+      let newGerman = this.word.german ? this.word.german.trim() : ''; 
+
+      this.word.english = newEnglish;
+      this.word.vietnamese = newVietnamese;
+      this.word.german = newGerman;
+
+      // 2. Check Empty
+      if (newEnglish === '' || newGerman === '' || newVietnamese === '') {
         this.errorMessage = 'Please fill out all fields!';
         return;
       }
 
-      // 3. Validate English
-      if (!this.isValidText(this.word.english)) {
-        this.errorMessage = 'English invalid: Text only (no numbers/symbols)';
+      
+      if (
+        newEnglish === this.originalWord.english &&
+        newGerman === this.originalWord.german &&
+        newVietnamese === this.originalWord.vietnamese
+      ) {
+        this.errorMessage = 'No changes detected.';
+        return; 
+      }
+      // ----------------------------
+
+      // 3. Validate Regex
+      if (!this.isValidText(newEnglish)) {
+        this.errorMessage = 'English invalid: Text only';
+        return;
+      }
+      if (!this.isValidText(newGerman) || !this.isValidText(newVietnamese)) {
+        this.errorMessage = 'Meaning invalid: Text only';
         return;
       }
 
-      // 4. Validate German & Vietnamese 
-      if (!this.isValidText(this.word.german) || !this.isValidText(this.word.vietnamese)) {
-        this.errorMessage = 'Meaning invalid: Text only (no numbers/symbols)';
-        return;
-      }
-
-      // 5. Valid
+      // 4. Valid
       this.errorMessage = '';
       this.$emit('createOrUpdate', this.word);
     },
