@@ -77,7 +77,6 @@ export default {
       handler(newVal) {
         this.originalWord = JSON.parse(JSON.stringify(newVal));
       },
-      deep: true,
       immediate: true
     }
   },
@@ -116,7 +115,7 @@ export default {
         newGerman === this.originalWord.german &&
         newVietnamese === this.originalWord.vietnamese
       ) {
-        this.errorMessage = 'No changes detected.';
+        this.errorMessage = 'No changes.';
         return; 
       }
       // ----------------------------
