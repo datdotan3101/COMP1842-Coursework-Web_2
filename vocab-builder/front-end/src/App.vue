@@ -42,7 +42,7 @@ export default {
   width: 250px;
   margin: 10px;
   position: absolute;
-  top: 50; /* Lưu ý: Giá trị này có thể thiếu đơn vị (px, %, em, etc.) */
+  top: 50; 
   right: 0;
 }
 

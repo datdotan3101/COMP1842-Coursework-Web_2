@@ -1,6 +1,6 @@
 <template>
   <div class="test-container">
-    <h1>Test page</h1>
+    <h1>Test page (Multiple Choice)</h1>
 
     <div v-if="loading" class="loading-state">
       <p>Loading...</p>
@@ -14,14 +14,17 @@
       <div class="question-card">
         <h2 class="word-display">{{ currentWord.german }}</h2>
         
-        <input 
-          v-model="userAnswer" 
-          @keyup.enter="handleAction"
-          placeholder="Enter english meaning..." 
-          class="answer-input"
-          :disabled="isChecked" 
-          ref="answerInput"
-        />
+        <div class="options-grid">
+          <button 
+            v-for="(option, index) in currentOptions" 
+            :key="index"
+            @click="selectOption(option)"
+            :disabled="isChecked"
+            :class="['option-btn', getOptionClass(option)]"
+          >
+            {{ option.english }}
+          </button>
+        </div>
 
         <div v-if="feedback" :class="['feedback-msg', isCorrect ? 'success' : 'error']">
           {{ feedback }}
@@ -30,6 +33,7 @@
         <button 
           @click="handleAction" 
           :class="['btn-action', isChecked ? 'btn-next' : 'btn-check']"
+          :disabled="!selectedOption && !isChecked"
         >
           {{ isChecked ? 'Next' : 'Check' }}
         </button>
@@ -58,12 +62,14 @@ export default {
     return {
       words: [],
       currentIndex: 0,
-      userAnswer: '',
+      
+      selectedOption: null, 
+      currentOptions: [], // Contain 4 answer for currrent question
+
       score: 0,
       showResult: false,
       loading: true,
       
-      // State to process UI
       isChecked: false, 
       isCorrect: false, 
       feedback: ''      
@@ -84,6 +90,7 @@ export default {
         const response = await api.getTestWords();
         this.words = response;
         this.resetState();
+        if (this.words.length > 0) this.generateOptions();
       } catch (error) {
         console.error(error);
       } finally {
@@ -91,7 +98,44 @@ export default {
       }
     },
 
-    // Function process enter keyboard
+    // Genarate answer
+    generateOptions() {
+      const correct = this.currentWord;
+      // Filter other answer to wrong answer
+      const distractors = this.words
+        .filter(w => w._id !== correct._id)
+        .sort(() => 0.5 - Math.random()) 
+        .slice(0, 3); 
+
+      // Merge answer, random
+      const options = [...distractors, correct];
+      this.currentOptions = options.sort(() => 0.5 - Math.random());
+    },
+
+    // Choose answer
+    selectOption(option) {
+      if (this.isChecked) return; 
+      this.selectedOption = option;
+    },
+
+    getOptionClass(option) {
+      // Hight selecting
+      if (!this.isChecked) {
+        return this.selectedOption === option ? 'selected' : '';
+      }
+      
+      // 1.correct - green
+      if (option._id === this.currentWord._id) {
+        return 'correct-answer';
+      }
+      // 2. Wrong - red
+      if (this.selectedOption === option && option._id !== this.currentWord._id) {
+        return 'wrong-answer';
+      }
+      
+      return 'disabled-option';
+    },
+
     handleAction() {
       if (this.isChecked) {
         this.nextQuestion();
@@ -101,38 +145,32 @@ export default {
     },
 
     checkAnswer() {
-        // Do not allow empty
-      if (!this.userAnswer) return; 
-
-      const correct = this.currentWord.english.toLowerCase().trim();
-      const user = this.userAnswer.toLowerCase().trim();
+      if (!this.selectedOption) return; 
 
       this.isChecked = true; 
 
-      if (correct === user) {
+      if (this.selectedOption._id === this.currentWord._id) {
         this.score++;
         this.isCorrect = true;
         this.feedback = 'Correct! 🎉';
       } else {
         this.isCorrect = false;
-       // Display correct answer
-        this.feedback = `Wrong, correct answer is: "${this.currentWord.english}"`; 
+        this.feedback = `Wrong! The correct answer is "${this.currentWord.english}"`; 
       }
     },
 
     nextQuestion() {
       if (this.currentIndex < this.words.length - 1) {
         this.currentIndex++;
-        // Reset new questions
-        this.userAnswer = '';
+        
+        // Restate new question
+        this.selectedOption = null;
         this.isChecked = false;
         this.feedback = '';
         this.isCorrect = false;
         
-        // Auto focus input test
-        this.$nextTick(() => {
-          if(this.$refs.answerInput) this.$refs.answerInput.focus();
-        });
+        // New quiz
+        this.generateOptions();
       } else {
         this.showResult = true;
       }
@@ -141,7 +179,7 @@ export default {
     resetState() {
       this.currentIndex = 0;
       this.score = 0;
-      this.userAnswer = '';
+      this.selectedOption = null;
       this.showResult = false;
       this.isChecked = false;
       this.feedback = '';
@@ -155,7 +193,7 @@ export default {
 </script>
 
 <style scoped>
-.test-container { text-align: center; max-width: 500px; margin: 40px auto; font-family: 'Arial', sans-serif; }
+.test-container { text-align: center; max-width: 600px; margin: 40px auto; font-family: 'Arial', sans-serif; }
 
 .question-card, .result-card {
   background: white;
@@ -167,19 +205,54 @@ export default {
 
 .word-display { font-size: 2.5em; color: #34495e; margin: 20px 0; }
 
-.answer-input { 
-  padding: 12px; 
-  width: 100%; 
-  box-sizing: border-box; 
-  font-size: 1.1em; 
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  outline: none;
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  gap: 15px;
+  margin-bottom: 25px;
 }
-.answer-input:focus { border-color: #42b983; }
 
-/* Button styles */
+.option-btn {
+  padding: 15px;
+  font-size: 1.1em;
+  background-color: #f8f9fa;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #2c3e50;
+}
+
+.option-btn:hover:not(:disabled) {
+  background-color: #e2e6ea;
+  border-color: #bdc3c7;
+}
+
+.option-btn.selected {
+  border-color: #3498db;
+  background-color: #ebf5fb;
+  color: #2980b9;
+  font-weight: bold;
+}
+
+.option-btn.correct-answer {
+  background-color: #d4edda !important;
+  border-color: #28a745 !important;
+  color: #155724 !important;
+}
+
+.option-btn.wrong-answer {
+  background-color: #f8d7da !important;
+  border-color: #dc3545 !important;
+  color: #721c24 !important;
+}
+
+.option-btn.disabled-option {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button styles main */
 .btn-action, .btn-retry { 
   padding: 12px 25px; 
   font-size: 1em; 
@@ -189,14 +262,16 @@ export default {
   cursor: pointer; 
   transition: all 0.3s;
   width: 100%;
+  margin-top: 10px;
 }
 .btn-check { background-color: #3498db; }
 .btn-next { background-color: #42b983; }
 .btn-retry { background-color: #f39c12; }
-.btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-action:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+.btn-action:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
 
 /* Feedback styles */
-.feedback-msg { margin-bottom: 15px; font-weight: bold; font-size: 1.1em; padding: 10px; border-radius: 6px; }
+.feedback-msg { margin-top: 15px; font-weight: bold; font-size: 1.1em; padding: 10px; border-radius: 6px; }
 .feedback-msg.success { background-color: #e8f8f5; color: #27ae60; }
 .feedback-msg.error { background-color: #fdedec; color: #c0392b; }
 
